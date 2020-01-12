@@ -104,17 +104,27 @@ class NfcManager {
 
   Future<void> _handleNdefDiscovered(Map<String, dynamic> arguments) async {
     NfcTag tag = $nfcTagFromJson(arguments);
-    Ndef ndef = $ndefFromTag(tag);
-    if (ndef != null && _onNdefDiscovered != null)
-      await _onNdefDiscovered(ndef);
-    _disposeTag(tag);
+    try {
+      Ndef ndef = $ndefFromTag(tag);
+      if (ndef != null && _onNdefDiscovered != null)
+        await _onNdefDiscovered(ndef);
+      _disposeTag(tag);
+    } catch (e) {
+      _disposeTag(tag);
+      throw e;
+    }
   }
 
   Future<void> _handleOnTagDiscovered(Map<String, dynamic> arguments) async {
     NfcTag tag = $nfcTagFromJson(arguments);
-    if (_onTagDiscovered != null)
-      await _onTagDiscovered(tag);
-    _disposeTag(tag);
+    try {
+      if (_onTagDiscovered != null)
+        await _onTagDiscovered(tag);
+      _disposeTag(tag);
+    } catch (e) {
+      _disposeTag(tag);
+      throw e;
+    }
   }
 
   Future<bool> _disposeTag(NfcTag tag) async {
