@@ -321,6 +321,20 @@ class ISO15693 {
       'parameters': parameters,
     });
   }
+
+  Future<Uint8List> writeMultipleBlocks({
+    @required Set<ISO15693RequestFlag> requestFlags,
+    @required int location,
+    @required Uint8List payload,
+  }) async {
+    return channel.invokeMethod('ISO15693#writeMultipleBlocks', {
+      'handle': tag.handle,
+      'requestFlags': requestFlags.map((e) => e.index).toList(),
+      'location': location,
+      'length': payload.length,
+      'payload': payload,
+    });
+  }
 }
 
 /// (iOS only) Provides access to ISO7816 operations on the tag.

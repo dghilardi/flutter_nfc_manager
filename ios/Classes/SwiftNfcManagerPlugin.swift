@@ -52,6 +52,9 @@ public class SwiftNfcManagerPlugin: NSObject, FlutterPlugin {
         case "ISO15693#customCommand":
             handleISO15693CustomCommand(call.arguments as! [String:Any?], result: result)
             break
+        case "ISO15693#writeMultipleBlocks":
+            handleISO15693WriteMultipleBlocks(call.arguments as! [String:Any?], result: result)
+            break
         case "ISO7816#sendCommand":
             handleISO7816SendCommand(call.arguments as! [String:Any?], result: result)
             break
@@ -245,6 +248,34 @@ public class SwiftNfcManagerPlugin: NSObject, FlutterPlugin {
             }
 
             result(data)
+        }
+    }
+    
+    private func handleISO15693WriteMultipleBlocks(_ arguments: [String:Any?], result: @escaping FlutterResult) {
+        guard #available(iOS 13.0, *) else {
+            result(FlutterError(code: "unavailable", message: "Only available in iOS 13.0 or newer.", details: nil))
+            return
+        }
+
+        let handle = arguments["handle"] as! String
+        let requestFlags = requestFlagFrom(arguments["requestFlags"] as! [Int])
+        let location = arguments["location"] as! Int
+        let length = arguments["length"] as! Int
+        let payload = arguments["payload"] as! [UInt8]
+
+        let range = NSRange(location: location, length: length)
+        let data = Data(bytes: payload, count: length)
+        
+        guard let connectedTech = techs[handle] as? NFCISO15693Tag else {
+            result(FlutterError(code: "not_found", message: "Tag is not found.", details: nil))
+            return
+        }
+
+        connectedTech.writeMultipleBlocks(requestFlags: requestFlags, blockRange: range, dataBlocks: [data]) { error in
+            if let error = error {
+                result(error.toFlutterError())
+                return
+            }
         }
     }
 
