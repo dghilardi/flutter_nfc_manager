@@ -107,7 +107,7 @@ class NfcManager {
     try {
       Ndef ndef = $ndefFromTag(tag);
       if (ndef != null && _onNdefDiscovered != null)
-        await _onNdefDiscovered(ndef);
+        await _onNdefDiscovered(ndef).timeout(Duration(seconds: 2));
       _disposeTag(tag);
     } catch (e) {
       _disposeTag(tag);
@@ -119,7 +119,7 @@ class NfcManager {
     NfcTag tag = $nfcTagFromJson(arguments);
     try {
       if (_onTagDiscovered != null)
-        await _onTagDiscovered(tag);
+        await _onTagDiscovered(tag).timeout(Duration(seconds: 2));
       _disposeTag(tag);
     } catch (e) {
       _disposeTag(tag);
