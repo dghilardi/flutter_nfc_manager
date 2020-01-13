@@ -261,22 +261,31 @@ public class SwiftNfcManagerPlugin: NSObject, FlutterPlugin {
         let requestFlags = requestFlagFrom(arguments["requestFlags"] as! [Int])
         let location = arguments["location"] as! Int
         let length = arguments["length"] as! Int
-        let payload = arguments["payload"] as! [UInt8]
+        let payload = (arguments["payload"] as! FlutterStandardTypedData)
+            .data
+            .map { Data([$0]) }
 
         let range = NSRange(location: location, length: length)
-        let data = Data(bytes: payload, count: length)
         
         guard let connectedTech = techs[handle] as? NFCISO15693Tag else {
             result(FlutterError(code: "not_found", message: "Tag is not found.", details: nil))
             return
         }
 
-        connectedTech.writeMultipleBlocks(requestFlags: requestFlags, blockRange: range, dataBlocks: [data]) { error in
+        connectedTech.writeMultipleBlocks(requestFlags: requestFlags, blockRange: range, dataBlocks: payload) { error in
             if let error = error {
                 result(error.toFlutterError())
                 return
             }
         }
+  /*
+        connectedTech.writeSingleBlock(requestFlags: requestFlags, blockNumber: UInt8(location), dataBlock: payload[0]) { error in
+            if let error = error {
+                result(error.toFlutterError())
+                return
+            }
+        }
+ */
     }
 
     private func handleISO15693CustomCommand(_ arguments: [String:Any?], result: @escaping FlutterResult) {
