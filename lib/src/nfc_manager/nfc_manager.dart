@@ -50,10 +50,12 @@ class NfcManager {
   Future<bool> startNdefSession({
     @required NdefDiscoveredCallback onDiscovered,
     String alertMessageIOS,
+    NdefMessage directWriteMsg
   }) async {
     _onNdefDiscovered = onDiscovered;
     return channel.invokeMethod('startNdefSession', {
       'alertMessageIOS': alertMessageIOS,
+      'directWrite': directWriteMsg == null ? null : $ndefMessageToJson(directWriteMsg)
     });
   }
 

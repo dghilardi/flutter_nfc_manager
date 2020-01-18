@@ -9,6 +9,9 @@ public class SwiftNfcManagerPlugin: NSObject, FlutterPlugin {
 
     @available(iOS 13.0, *)
     private lazy var techs: [String:NFCNDEFTag] = [:]
+    
+    @available(iOS 13.0, *)
+    private lazy var directWrite: NFCNDEFMessage? = nil
 
     public static func register(with registrar: FlutterPluginRegistrar) {
         let channel = FlutterMethodChannel(name: "plugins.flutter.io/nfc_manager", binaryMessenger: registrar.messenger())
@@ -79,6 +82,14 @@ public class SwiftNfcManagerPlugin: NSObject, FlutterPlugin {
         }
 
         let alertMessageIOS = arguments["alertMessageIOS"] as? String
+        
+        if #available(iOS 13.0, *) {
+            if let directWrite = arguments["directWrite"] as? [String:Any?] {
+                self.directWrite = ndefMessageFrom(directWrite)
+            } else {
+                self.directWrite = nil
+            }
+        }
 
         session = NFCNDEFReaderSession(delegate: self, queue: nil, invalidateAfterFirstRead: false)
 
@@ -384,8 +395,27 @@ extension SwiftNfcManagerPlugin: NFCNDEFReaderSessionDelegate {
                     return
                 }
 
-                self.techs[handle] = tech
-                self.channel.invokeMethod("onNdefDiscovered", arguments: data.merging(["handle": handle]) { cur, _ in cur })
+                if let ndefMessage = self.directWrite {
+                    tech.writeNDEF(ndefMessage) { error in
+                        if let error = error {
+                            print(error)
+                            
+                            if let session = self.session {
+                                session.invalidate(errorMessage: "ERROR")
+                                self.session = nil
+                            }
+                            return
+                        }
+                        
+                        if let session = self.session {
+                            session.invalidate()
+                            self.session = nil
+                        }
+                    }
+                } else {
+                    self.techs[handle] = tech
+                    self.channel.invokeMethod("onNdefDiscovered", arguments: data.merging(["handle": handle]) { cur, _ in cur })
+                }
             }
         }
     }
@@ -417,8 +447,27 @@ extension SwiftNfcManagerPlugin: NFCTagReaderSessionDelegate {
                     return
                 }
 
-                self.techs[handle] = tech
-                self.channel.invokeMethod("onTagDiscovered", arguments: data.merging(["handle": handle]) { cur, _ in cur })
+                if let ndefMessage = self.directWrite {
+                    tech.writeNDEF(ndefMessage) { error in
+                        if let error = error {
+                            print(error)
+                            
+                            if let session = self.session {
+                                session.invalidate(errorMessage: "ERROR")
+                                self.session = nil
+                            }
+                            return
+                        }
+                        
+                        if let session = self.session {
+                            session.invalidate()
+                            self.session = nil
+                        }
+                    }
+                } else {
+                    self.techs[handle] = tech
+                    self.channel.invokeMethod("onTagDiscovered", arguments: data.merging(["handle": handle]) { cur, _ in cur })
+                }
             }
         }
     }
