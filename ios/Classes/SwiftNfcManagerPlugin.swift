@@ -261,9 +261,14 @@ public class SwiftNfcManagerPlugin: NSObject, FlutterPlugin {
         let requestFlags = requestFlagFrom(arguments["requestFlags"] as! [Int])
         let location = arguments["location"] as! Int
         let length = arguments["length"] as! Int
-        let payload = (arguments["payload"] as! FlutterStandardTypedData)
-            .data
-            .map { Data([$0]) }
+        let payload = Data(
+            (arguments["payload"] as! FlutterStandardTypedData).data
+        )
+        
+        let dataBlock:[Data] = (0..<payload.count/4).map {blockIndex in
+            let blockRange = blockIndex*4..<(blockIndex+1)*4
+            return payload.subdata(in: blockRange)
+        }
 
         let range = NSRange(location: location, length: length)
         
@@ -271,21 +276,28 @@ public class SwiftNfcManagerPlugin: NSObject, FlutterPlugin {
             result(FlutterError(code: "not_found", message: "Tag is not found.", details: nil))
             return
         }
-
+/*
         connectedTech.writeMultipleBlocks(requestFlags: requestFlags, blockRange: range, dataBlocks: payload) { error in
             if let error = error {
                 result(error.toFlutterError())
                 return
             }
         }
-  /*
-        connectedTech.writeSingleBlock(requestFlags: requestFlags, blockNumber: UInt8(location), dataBlock: payload[0]) { error in
+*/
+        guard let blockData = dataBlock.first else {
+            result(FlutterError(code: "invalid_payload", message: "Invalid Payload.", details: nil))
+            return
+        }
+        
+        connectedTech.writeSingleBlock(requestFlags: requestFlags, blockNumber: UInt8(location), dataBlock: blockData) { error in
             if let error = error {
                 result(error.toFlutterError())
                 return
             }
+            
+            result(true);
         }
- */
+
     }
 
     private func handleISO15693CustomCommand(_ arguments: [String:Any?], result: @escaping FlutterResult) {

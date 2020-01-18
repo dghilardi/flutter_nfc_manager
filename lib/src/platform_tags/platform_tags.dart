@@ -322,7 +322,7 @@ class ISO15693 {
     });
   }
 
-  Future<Uint8List> writeMultipleBlocks({
+  Future<bool> writeMultipleBlocks({
     @required Set<ISO15693RequestFlag> requestFlags,
     @required int location,
     @required Uint8List payload,
