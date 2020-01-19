@@ -322,16 +322,15 @@ class ISO15693 {
     });
   }
 
-  Future<bool> writeMultipleBlocks({
+  Future<bool> writeSingleBlock({
     @required Set<ISO15693RequestFlag> requestFlags,
     @required int location,
     @required Uint8List payload,
   }) async {
-    return channel.invokeMethod('ISO15693#writeMultipleBlocks', {
+    return channel.invokeMethod('ISO15693#writeSingleBlock', {
       'handle': tag.handle,
       'requestFlags': requestFlags.map((e) => e.index).toList(),
       'location': location,
-      'length': payload.length,
       'payload': payload,
     });
   }
