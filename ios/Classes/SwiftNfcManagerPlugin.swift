@@ -367,6 +367,9 @@ extension SwiftNfcManagerPlugin: NFCNDEFReaderSessionDelegate {
     }
 
     public func readerSession(_ session: NFCNDEFReaderSession, didInvalidateWithError error: Error) {
+        let code = (error as NSError).code;
+        let err = error.localizedDescription;
+        self.channel.invokeMethod("onError", arguments: ["err": err, "code": code])
     }
 
     public func readerSession(_ session: NFCNDEFReaderSession, didDetectNDEFs messages: [NFCNDEFMessage]) {
@@ -384,6 +387,9 @@ extension SwiftNfcManagerPlugin: NFCNDEFReaderSessionDelegate {
             if let error = error {
                 // skip tag detection
                 print(error)
+                let code = (error as NSError).code;
+                let err = error.localizedDescription;
+                self.channel.invokeMethod("onError", arguments: ["err": err, "code": code])
                 return
             }
 
@@ -391,6 +397,9 @@ extension SwiftNfcManagerPlugin: NFCNDEFReaderSessionDelegate {
                 if let error = error {
                     // skip tag detection
                     print(error)
+                    let code = (error as NSError).code;
+                    let err = error.localizedDescription;
+                    self.channel.invokeMethod("onError", arguments: ["err": err, "code": code])
                     return
                 }
 
@@ -407,6 +416,9 @@ extension SwiftNfcManagerPlugin: NFCTagReaderSessionDelegate {
     }
 
     public func tagReaderSession(_ session: NFCTagReaderSession, didInvalidateWithError error: Error) {
+        let code = (error as NSError).code;
+        let err = error.localizedDescription;
+        self.channel.invokeMethod("onError", arguments: ["err": err, "code": code])
     }
 
     public func tagReaderSession(_ session: NFCTagReaderSession, didDetect tags: [NFCTag]) {
@@ -417,6 +429,9 @@ extension SwiftNfcManagerPlugin: NFCTagReaderSessionDelegate {
             if let error = error {
                 // skip tag detection
                 print(error)
+                let code = (error as NSError).code;
+                let err = error.localizedDescription;
+                self.channel.invokeMethod("onError", arguments: ["err": err, "code": code])
                 return
             }
 
@@ -424,6 +439,9 @@ extension SwiftNfcManagerPlugin: NFCTagReaderSessionDelegate {
                 if let error = error {
                     // skip tag detection
                     print(error)
+                    let code = (error as NSError).code;
+                    let err = error.localizedDescription;
+                    self.channel.invokeMethod("onError", arguments: ["err": err, "code": code])
                     return
                 }
 
