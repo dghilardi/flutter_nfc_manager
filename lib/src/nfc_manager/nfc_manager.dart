@@ -1,12 +1,13 @@
 import 'package:flutter/foundation.dart';
 import 'package:flutter/services.dart';
+import 'package:nfc_manager/src/nfc_manager/nfc_exception.dart';
 
 import '../channel.dart';
 import '../translator.dart';
 import './nfc_ndef.dart';
 
 /// Callback type for handling errors.
-typedef ErrorCallback = Future<void> Function(FlutterError err);
+typedef ErrorCallback = Future<void> Function(NfcException err);
 
 /// Callback type for handling ndef detection.
 typedef NdefDiscoveredCallback = Future<void> Function(Ndef ndef);
@@ -143,7 +144,7 @@ class NfcManager {
   Future<void> _handleOnError(Map<String, dynamic> arguments) async {
     final err = arguments['err'];
     final code = arguments['code'];
-    await _onError(FlutterError('$code - $err'));
+    await _onError(NfcException(code, err));
   }
 
   Future<bool> _disposeTag(NfcTag tag) async {
